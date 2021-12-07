@@ -39,7 +39,7 @@ IbcPolicy.use_langevin = True
 IbcPolicy.optimize_again = False
 
 # Configs for cloning net.
-MLPEBM.layers = 'ResNetPreActivation'
+MLPEBM.layers = 'MLPDropout'
 MLPEBM.width = 256
 MLPEBM.depth = 2
 MLPEBM.rate = 0.0
