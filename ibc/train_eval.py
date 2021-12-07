@@ -383,6 +383,8 @@ def main(_):
     sync_tensorboard=True,
   )
   # Print operative gin config to stdout so wandb can intercept.
+  # (it'd be nice for gin to provide a flat/nested dictionary of values so they
+  # can be used via wandb's aggregation...)
   print(gin.config.config_str())
 
   # For TPU, FLAGS.tpu will be set with a TPU address and FLAGS.use_gpu
