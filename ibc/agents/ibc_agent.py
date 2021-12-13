@@ -36,6 +36,13 @@ from tf_agents.utils import common
 from tf_agents.utils import nest_utils
 
 
+def add_tensor_summaries(self, d, prefix, xs):
+  # Much simpler version of generate_tensor_summaries.
+  d[f"{prefix}.min"] = tf.reduce_min(xs)
+  d[f"{prefix}.avg"] = tf.reduce_mean(xs)
+  d[f"{prefix}.max"] = tf.reduce_max(xs)
+
+
 @gin.configurable
 class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
   """TFAgent, implementing implicit behavioral cloning."""
@@ -263,19 +270,19 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
         opt_dict = dict()
         if chain_data is not None and chain_data.energies is not None:
           energies = chain_data.energies
-          opt_dict['overall_energies_avg'] = tf.reduce_mean(energies)
+          add_tensor_summaries(opt_dict, "overall_energies", energies)
           first_energies = energies[0]
-          opt_dict['first_energies_avg'] = tf.reduce_mean(first_energies)
+          add_tensor_summaries(opt_dict, "first_energies", first_energies)
           final_energies = energies[-1]
-          opt_dict['final_energies_avg'] = tf.reduce_mean(final_energies)
+          add_tensor_summaries(opt_dict, "final_energies", final_energies)
 
         if chain_data is not None and chain_data.grad_norms is not None:
           grad_norms = chain_data.grad_norms
-          opt_dict['overall_grad_norms_avg'] = tf.reduce_mean(grad_norms)
+          add_tensor_summaries(opt_dict, "overall_grad_norms", grad_norms)
           first_grad_norms = grad_norms[0]
-          opt_dict['first_grad_norms_avg'] = tf.reduce_mean(first_grad_norms)
+          add_tensor_summaries(opt_dict, "first_grad_norms", first_grad_norms)
           final_grad_norms = grad_norms[-1]
-          opt_dict['final_grad_norms_avg'] = tf.reduce_mean(final_grad_norms)
+          add_tensor_summaries(opt_dict, "final_grad_norms", final_grad_norms)
 
         losses_dict.update(opt_dict)
 
