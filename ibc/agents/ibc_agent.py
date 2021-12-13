@@ -25,6 +25,7 @@ from ibc.ibc.agents import ibc_policy
 from ibc.ibc.agents import mcmc
 from ibc.ibc.losses import ebm_loss
 from ibc.ibc.losses import gradient_loss
+from ibc.ibc.utils import debug
 import tensorflow as tf
 from tf_agents.agents import tf_agent
 from tf_agents.networks import network
@@ -36,7 +37,7 @@ from tf_agents.utils import common
 from tf_agents.utils import nest_utils
 
 
-def add_tensor_summaries(self, d, prefix, xs):
+def add_tensor_summaries(d, prefix, xs):
   # Much simpler version of generate_tensor_summaries.
   d[f"{prefix}.min"] = tf.reduce_min(xs)
   d[f"{prefix}.avg"] = tf.reduce_mean(xs)
@@ -268,21 +269,32 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
               mse_counter_examples)
 
         opt_dict = dict()
-        if chain_data is not None and chain_data.energies is not None:
-          energies = chain_data.energies
-          add_tensor_summaries(opt_dict, "overall_energies", energies)
-          first_energies = energies[0]
-          add_tensor_summaries(opt_dict, "first_energies", first_energies)
-          final_energies = energies[-1]
-          add_tensor_summaries(opt_dict, "final_energies", final_energies)
+        # if chain_data is not None and chain_data.energies is not None:
+        #   energies = chain_data.energies
+        #   add_tensor_summaries(opt_dict, "overall_energies", energies)
+        #   first_energies = energies[0]
+        #   add_tensor_summaries(opt_dict, "first_energies", first_energies)
+        #   final_energies = energies[-1]
+        #   add_tensor_summaries(opt_dict, "final_energies", final_energies)
 
-        if chain_data is not None and chain_data.grad_norms is not None:
-          grad_norms = chain_data.grad_norms
-          add_tensor_summaries(opt_dict, "overall_grad_norms", grad_norms)
-          first_grad_norms = grad_norms[0]
-          add_tensor_summaries(opt_dict, "first_grad_norms", first_grad_norms)
-          final_grad_norms = grad_norms[-1]
-          add_tensor_summaries(opt_dict, "final_grad_norms", final_grad_norms)
+        # if chain_data is not None and chain_data.grad_norms is not None:
+        #   grad_norms = chain_data.grad_norms
+        #   add_tensor_summaries(opt_dict, "overall_grad_norms", grad_norms)
+        #   first_grad_norms = grad_norms[0]
+        #   add_tensor_summaries(opt_dict, "first_grad_norms", first_grad_norms)
+        #   final_grad_norms = grad_norms[-1]
+        #   add_tensor_summaries(opt_dict, "final_grad_norms", final_grad_norms)
+
+        self._log_energy_info(
+            opt_dict,
+            "_pos",
+            observations,
+            expanded_actions)
+        self._log_energy_info(
+            opt_dict,
+            "_neg",
+            observations,
+            counter_example_actions)
 
         losses_dict.update(opt_dict)
 
@@ -343,6 +355,29 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
       raise ValueError('Unsupported EBM loss type.')
 
     return per_example_loss, debug_dict
+
+  def _log_energy_info(
+      self,
+      opt_dict,
+      suffix,
+      observations,
+      actions):
+    assert not self._late_fusion  # TODO(eric): Support?
+    B, K, _ = actions.shape
+    reshape_actions = tf.reshape(actions, ((B * K, -1)))
+    tiled_obs = nest_utils.tile_batch(observations, K)
+    de_dact, energies = mcmc.gradient_wrt_act(
+        self.cloning_network,
+        tiled_obs,
+        reshape_actions,
+        training=False,
+        network_state=(),
+        tfa_step_type=(),
+        apply_exp=False,
+        obs_encoding=None)
+    grad_norms = mcmc.compute_grad_norm(self._grad_norm_type, de_dact)
+    add_tensor_summaries(opt_dict, f"energies{suffix}", energies)
+    add_tensor_summaries(opt_dict, f"grad_norms{suffix}", grad_norms)
 
   def _make_counter_example_actions(
       self,
