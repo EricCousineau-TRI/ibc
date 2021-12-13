@@ -40,7 +40,7 @@ def make_video(agent, env, root_dir, step, strategy):
   policy = strategy_policy.StrategyPyTFEagerPolicy(
       agent.policy, strategy=strategy)
   video_path = os.path.join(root_dir, 'videos', 'ttl=7d', 'vid_%d.mp4' % step)
-  video_env = make_video_env(env, vido_path)
+  video_env = make_video_env(env, video_path)
   driver = py_driver.PyDriver(video_env, policy, observers=[], max_episodes=1)
   time_step = video_env.reset()
   initial_policy_state = policy.get_initial_state(1)
