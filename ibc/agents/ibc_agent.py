@@ -193,8 +193,6 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
                                  expanded_actions.shape[-1]))
           mse_counter_examples = self._mse(counter_example_actions,
                                            actions_size_n)
-          mse_counter_examples = common.aggregate_losses(
-              per_example_loss=mse_counter_examples).total_loss
 
         if self._late_fusion:
           # Do one cheap forward pass.
