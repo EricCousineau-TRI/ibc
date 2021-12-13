@@ -25,7 +25,7 @@ train_eval.eval_episodes = 50
 train_eval.learning_rate = 1e-3
 train_eval.goal_tolerance = 0.02
 train_eval.seed = 0
-train_eval.sequence_length = 2
+train_eval.sequence_length = 1
 train_eval.dataset_eval_fraction = 0.0
 
 IbcPolicy.num_action_samples = 512
