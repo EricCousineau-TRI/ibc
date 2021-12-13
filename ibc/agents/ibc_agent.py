@@ -265,8 +265,7 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
         if grad_loss is not None:
           losses_dict['grad_loss'] = tf.reduce_mean(grad_loss)
         if self._compute_mse:
-          losses_dict['mse_counter_examples'] = tf.reduce_mean(
-              mse_counter_examples)
+          add_tensor_summaries(losses_dict, "mse_counter_examples", mse_counter_examples)
 
         opt_dict = dict()
         # if chain_data is not None and chain_data.energies is not None:
@@ -287,14 +286,14 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
 
         self._log_energy_info(
             opt_dict,
-            "_pos",
             observations,
-            expanded_actions)
+            expanded_actions,
+            fmt="EnergyStats/{}_pos")
         self._log_energy_info(
             opt_dict,
-            "_neg",
             observations,
-            counter_example_actions)
+            counter_example_actions,
+            fmt="EnergyStats/{}_neg")
 
         losses_dict.update(opt_dict)
 
@@ -359,9 +358,10 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
   def _log_energy_info(
       self,
       opt_dict,
-      suffix,
       observations,
-      actions):
+      actions,
+      *,
+      fmt):
     assert not self._late_fusion  # TODO(eric): Support?
     B, K, _ = actions.shape
     reshape_actions = tf.reshape(actions, ((B * K, -1)))
@@ -376,8 +376,8 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
         apply_exp=False,
         obs_encoding=None)
     grad_norms = mcmc.compute_grad_norm(self._grad_norm_type, de_dact)
-    add_tensor_summaries(opt_dict, f"energies{suffix}", energies)
-    add_tensor_summaries(opt_dict, f"grad_norms{suffix}", grad_norms)
+    add_tensor_summaries(opt_dict, fmt.format("energies"), energies)
+    add_tensor_summaries(opt_dict, fmt.format("grad_norms"), grad_norms)
 
   def _make_counter_example_actions(
       self,
