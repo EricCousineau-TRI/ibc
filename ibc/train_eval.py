@@ -257,6 +257,45 @@ def train_eval(
       os.path.join(root_dir, 'operative-gin-config.txt'), 'wb') as f:
     f.write(gin.operative_config_str())
 
+  def do_eval():
+    all_metrics = []
+    for eval_env, eval_actor, env_name, success_metric in zip(
+        eval_envs, eval_actors, env_names, eval_success_metrics):
+      # Run evaluation.
+      metrics = evaluation_step(
+          eval_episodes,
+          eval_env,
+          eval_actor,
+          name_scope_suffix=f'_{env_name}')
+      all_metrics.append(metrics)
+
+      # rendering on some of these envs is broken
+      if FLAGS.video and 'kitchen' not in task:
+        if 'PARTICLE' in task:
+          # A seed with spread-out goals is more clear to visualize.
+          eval_env.seed(42)
+        # Write one eval video.
+        video_module.make_video(
+            agent,
+            eval_env,
+            root_dir,
+            step=train_step.numpy(),
+            strategy=strategy)
+
+    metric_results = collections.defaultdict(list)
+    for env_metrics in all_metrics:
+      for metric in env_metrics:
+        metric_results[metric.name].append(metric.result())
+
+    with summary_writer.as_default(), \
+       common.soft_device_placement(), \
+       tf.summary.record_if(lambda: True):
+      for key, value in metric_results.items():
+        tf.summary.scalar(
+            name=os.path.join('AggregatedMetrics/', key),
+            data=sum(value) / len(value),
+            step=train_step)
+
   # Main train and eval loop.
   while train_step.numpy() < num_iterations:
     # Run bc_learner for fused_train_steps.
@@ -269,44 +308,7 @@ def train_eval(
           dist_eval_data_iter, bc_learner, train_step, get_eval_loss)
 
     if not skip_eval and train_step.numpy() % eval_interval == 0:
-
-      all_metrics = []
-      for eval_env, eval_actor, env_name, success_metric in zip(
-          eval_envs, eval_actors, env_names, eval_success_metrics):
-        # Run evaluation.
-        metrics = evaluation_step(
-            eval_episodes,
-            eval_env,
-            eval_actor,
-            name_scope_suffix=f'_{env_name}')
-        all_metrics.append(metrics)
-
-        # rendering on some of these envs is broken
-        if FLAGS.video and 'kitchen' not in task:
-          if 'PARTICLE' in task:
-            # A seed with spread-out goals is more clear to visualize.
-            eval_env.seed(42)
-          # Write one eval video.
-          video_module.make_video(
-              agent,
-              eval_env,
-              root_dir,
-              step=train_step.numpy(),
-              strategy=strategy)
-
-      metric_results = collections.defaultdict(list)
-      for env_metrics in all_metrics:
-        for metric in env_metrics:
-          metric_results[metric.name].append(metric.result())
-
-      with summary_writer.as_default(), \
-         common.soft_device_placement(), \
-         tf.summary.record_if(lambda: True):
-        for key, value in metric_results.items():
-          tf.summary.scalar(
-              name=os.path.join('AggregatedMetrics/', key),
-              data=sum(value) / len(value),
-              step=train_step)
+      do_eval()
 
   summary_writer.flush()
 
