@@ -386,10 +386,11 @@ def main(_):
                                       # eval working. Remove it once we do.
                                       skip_unknown=True)
 
-  # wandb.init(
-  #   project="google-research-ibc",
-  #   sync_tensorboard=True,
-  # )
+  wandb.init(
+    project="google-research-ibc",
+    sync_tensorboard=True,
+    magic=True,
+  )
   # Print operative gin config to stdout so wandb can intercept.
   # (it'd be nice for gin to provide a flat/nested dictionary of values so they
   # can be used via wandb's aggregation...)
