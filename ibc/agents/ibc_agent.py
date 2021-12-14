@@ -270,6 +270,7 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
           add_tensor_summaries(losses_dict, "mse_counter_examples", mse_counter_examples)
 
         opt_dict = dict()
+        opt_dict["batch_size"] = batch_size
         # if chain_data is not None and chain_data.energies is not None:
         #   energies = chain_data.energies
         #   add_tensor_summaries(opt_dict, "overall_energies", energies)
