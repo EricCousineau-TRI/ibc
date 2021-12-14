@@ -142,6 +142,7 @@ class ParticleEnv(gym.Env):
     return spaces.Dict(obs_dict)
 
   def seed(self, seed=None):
+    print(f"particle_env.seed({seed})")
     self._rng = np.random.RandomState(seed=seed)
 
   def reset(self):
