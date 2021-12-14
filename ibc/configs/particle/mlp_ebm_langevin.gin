@@ -39,6 +39,8 @@ compute_dataset_statistics.min_max_actions = True
 IbcPolicy.use_dfo = False
 IbcPolicy.use_langevin = True
 IbcPolicy.optimize_again = False
+ImplicitBCAgent.fraction_dfo_samples = 0.0
+ImplicitBCAgent.fraction_langevin_samples = 1.0
 
 # Configs for cloning net.
 MLPEBM.layers = 'MLPDropout'

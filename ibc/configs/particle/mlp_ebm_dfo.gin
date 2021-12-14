@@ -37,6 +37,8 @@ compute_dataset_statistics.min_max_actions = True
 
 IbcPolicy.use_dfo = True
 IbcPolicy.use_langevin = False
+ImplicitBCAgent.fraction_dfo_samples = 0.0
+ImplicitBCAgent.fraction_langevin_samples = 0.0
 IbcPolicy.optimize_again = False
 
 # Configs for cloning net.
