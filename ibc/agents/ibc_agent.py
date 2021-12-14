@@ -159,6 +159,7 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
     # but for a later optimization.
     # They only differ by having one more tiled obs or not.
     if self._late_fusion:
+      assert False  # HACK
       maybe_tiled_obs = observations
     else:
       maybe_tiled_obs = nest_utils.tile_batch(observations,
@@ -182,6 +183,7 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
 
         # generate counter examples inside gradient tape
         if self._run_full_chain_under_gradient:
+          assert False  # HACK
           counter_example_actions, combined_true_counter_actions, chain_data = (
               self._make_counter_example_actions(observations,
                                                  expanded_actions, batch_size,
@@ -195,6 +197,7 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
                                            actions_size_n)
 
         if self._late_fusion:
+          assert False  # HACK
           # Do one cheap forward pass.
           obs_embeddings = self.cloning_network.encode(maybe_tiled_obs,
                                                        training=True)
