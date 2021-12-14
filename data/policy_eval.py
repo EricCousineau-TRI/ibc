@@ -31,6 +31,7 @@ from ibc.environments.block_pushing import block_pushing_multimodal
 from ibc.environments.collect.utils import get_oracle as get_oracle_module
 from ibc.environments.particle import particle  # pylint: disable=unused-import
 from ibc.environments.particle import particle_oracles
+from ibc.ibc.agents import ibc_policy  # pylint: disable=unused-import
 from ibc.ibc.utils import make_video as video_module
 from tf_agents.drivers import py_driver
 from tf_agents.environments import suite_gym
@@ -146,6 +147,7 @@ def evaluate(num_episodes,
     policy = py_tf_eager_policy.SavedModelPyTFEagerPolicy(
         saved_model_path, load_specs_from_pbtxt=True)
     policy.update_from_checkpoint(checkpoint_path)
+    print(f"using saved model: {saved_model_path}")
   else:
     if static_policy == 'random':
       policy = random_py_policy.RandomPyPolicy(env.time_step_spec(),

@@ -113,7 +113,8 @@ def train_eval(
     # Use this to sweep amount of tfrecords going into training.
     # -1 for 'use all'.
     max_data_shards=-1,
-    use_warmup=False):
+    use_warmup=False,
+    checkpoint_interval=5000):
   """Trains a BC agent on the given datasets."""
   if task is None:
     raise ValueError('task argument must be set.')
@@ -226,7 +227,8 @@ def train_eval(
         train_step,
         create_train_and_eval_fns,
         fused_train_steps,
-        strategy)
+        strategy,
+        checkpoint_interval)
 
     # Define eval.
     eval_actors, eval_success_metrics = [], []
@@ -295,6 +297,8 @@ def train_eval(
             name=os.path.join('AggregatedMetrics/', key),
             data=sum(value) / len(value),
             step=train_step)
+
+  do_eval()
 
   # Main train and eval loop.
   while train_step.numpy() < num_iterations:
