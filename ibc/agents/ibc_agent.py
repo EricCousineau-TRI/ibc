@@ -137,6 +137,7 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
         summarize_grads_and_vars=summarize_grads_and_vars,
         train_step_counter=train_step_counter)
 
+  @debug.iex
   def _loss(self,
             experience,
             variables_to_train=None,
@@ -329,6 +330,20 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
       per_example_loss, debug_dict = ebm_loss.info_nce(
           predictions, batch_size, self._num_counter_examples,
           self._softmax_temperature, self._kl)
+
+      # Sanity check.
+      assert self._softmax_temperature == 1.0  # HACK
+      per_example_loss_again, _ = ebm_loss.simple_info_nce(
+          predictions, pos_sample_index=self._num_counter_examples)
+      # blech
+      # tf.debugging.assert_near(
+      #     per_example_loss, per_example_loss_again, atol=1e-8, rtol=0)
+      max_mag = tf.reduce_max(tf.math.abs(per_example_loss))
+      max_err = tf.reduce_max(tf.math.abs(
+        per_example_loss - per_example_loss_again))
+      tf.print(max_err/ max_mag)
+      # assert max_err.numpy() < 1e-8, max_err.numpy()
+
     elif self.ebm_loss_type == 'cd':
       per_example_loss, debug_dict = ebm_loss.cd(predictions)
     elif self.ebm_loss_type == 'cd_kl':

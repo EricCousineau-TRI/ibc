@@ -36,18 +36,21 @@ def info_nce(predictions,
     (loss per each element in the batch, and an optional
      dictionary with any loss objects to log)
   """
-  # softmaxed_predictions = tf.nn.softmax(
-  #     predictions / softmax_temperature, axis=-1)
+  softmaxed_predictions = tf.nn.softmax(
+      predictions / softmax_temperature, axis=-1)
 
-  # # [B x n+1] with 1 in column [:, -1]
-  # indices = tf.ones(
-  #     (batch_size,), dtype=tf.int32) * num_counter_examples
-  # labels = tf.one_hot(indices, depth=num_counter_examples + 1)
+  # [B x n+1] with 1 in column [:, -1]
+  indices = tf.ones(
+      (batch_size,), dtype=tf.int32) * num_counter_examples
+  labels = tf.one_hot(indices, depth=num_counter_examples + 1)
 
-  # per_example_loss = kl(labels, softmaxed_predictions)
-  assert softmax_temperature == 1.0
-  log_softmin_all = tf.nn.log_softmax(-predictions)
-  pos_sample_index = num_counter_examples
+  per_example_loss = kl(labels, softmaxed_predictions)
+
+  return per_example_loss, dict()
+
+
+def simple_info_nce(energies, pos_sample_index):
+  log_softmin_all = tf.nn.log_softmax(-energies)
   per_example_loss = -log_softmin_all[:, pos_sample_index]
   return per_example_loss, dict()
 

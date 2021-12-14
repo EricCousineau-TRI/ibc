@@ -29,6 +29,7 @@ from ibc.environments.block_pushing import block_pushing_discontinuous  # pylint
 from ibc.environments.particle import particle  # pylint: disable=unused-import
 from ibc.ibc import tasks
 from ibc.ibc.agents import ibc_policy  # pylint: disable=unused-import
+from ibc.ibc.agents import mcmc
 from ibc.ibc.eval import eval_env as eval_env_module
 from ibc.ibc.train import get_agent as agent_module
 from ibc.ibc.train import get_cloning_network as cloning_network_module
@@ -394,8 +395,9 @@ def main(_):
       tpu=FLAGS.tpu, use_gpu=FLAGS.use_gpu)
 
   task = FLAGS.task or gin.REQUIRED
-  # If setting this to True, change `my_rangea in mcmc.py to `= range`
-  tf.config.experimental_run_functions_eagerly(False)
+  # # If setting this to True, change `my_range` in mcmc.py to `= range`
+  # tf.config.run_functions_eagerly(True)
+  # mcmc.my_range = range
 
   train_eval(
       task=task,
