@@ -9,5 +9,6 @@ python3 ibc/ibc/train_eval.py -- \
   --tag=langevin \
   --add_time=True \
   --gin_bindings="train_eval.dataset_path='ibc/data/particle/$1d_oracle_particle*.tfrecord'" \
-  --gin_bindings="ParticleEnv.n_dim=$1" \
-  --video
+  --gin_bindings="ParticleEnv.n_dim=$1" #\
+
+  # --video
