@@ -327,22 +327,27 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
       expanded_actions,  # [B x 1 x act_spec]
       grad_flow_network_inputs):
     if self.ebm_loss_type == 'info_nce':
-      per_example_loss, debug_dict = ebm_loss.info_nce(
-          predictions, batch_size, self._num_counter_examples,
-          self._softmax_temperature, self._kl)
-
-      # Sanity check.
       assert self._softmax_temperature == 1.0  # HACK
-      per_example_loss_again, _ = ebm_loss.simple_info_nce(
-          predictions, pos_sample_index=self._num_counter_examples)
-      # blech
-      # tf.debugging.assert_near(
-      #     per_example_loss, per_example_loss_again, atol=1e-8, rtol=0)
-      max_mag = tf.reduce_max(tf.math.abs(per_example_loss))
-      max_err = tf.reduce_max(tf.math.abs(
-        per_example_loss - per_example_loss_again))
-      tf.print(max_err/ max_mag)
-      # assert max_err.numpy() < 1e-8, max_err.numpy()
+      do_sanity_check = False
+
+      per_example_loss, debug_dict = ebm_loss.simple_info_nce(
+          predictions,
+          pos_sample_index=self._num_counter_examples,
+          use_maybe_wrong_math=True)
+
+      if do_sanity_check:
+        per_example_loss_old, _ = ebm_loss.info_nce(
+            predictions, batch_size, self._num_counter_examples,
+            self._softmax_temperature, self._kl)
+        # # this is painful w/o eager execution; also, eager execution is slow
+        # tf.debugging.assert_near(
+        #     per_example_loss, per_example_loss_again, atol=1e-8, rtol=0)
+        # # needs eager exec
+        # assert max_err.numpy() < 1e-8, max_err.numpy()
+        max_mag = tf.reduce_max(tf.math.abs(per_example_loss))
+        max_err = tf.reduce_max(tf.math.abs(
+          per_example_loss - per_example_loss_again))
+        tf.print(max_err/ max_mag)
 
     elif self.ebm_loss_type == 'cd':
       per_example_loss, debug_dict = ebm_loss.cd(predictions)

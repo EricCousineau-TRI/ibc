@@ -49,8 +49,11 @@ def info_nce(predictions,
   return per_example_loss, dict()
 
 
-def simple_info_nce(energies, pos_sample_index):
-  log_softmin_all = tf.nn.log_softmax(-energies)
+def simple_info_nce(energies, *, pos_sample_index, use_maybe_wrong_math):
+  if use_maybe_wrong_math:
+    log_softmin_all = tf.nn.log_softmax(energies)  # Is this wrong?
+  else:
+    log_softmin_all = tf.nn.log_softmax(-energies)
   per_example_loss = -log_softmin_all[:, pos_sample_index]
   return per_example_loss, dict()
 
