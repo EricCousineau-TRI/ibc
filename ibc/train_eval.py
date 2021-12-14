@@ -275,7 +275,8 @@ def train_eval(
       if FLAGS.video and 'kitchen' not in task:
         if 'PARTICLE' in task:
           # A seed with spread-out goals is more clear to visualize.
-          eval_env.seed(42)
+          # eval_env.seed(42)
+          eval_env.seed(0)  # HACK
         # Write one eval video.
         video_module.make_video(
             agent,
