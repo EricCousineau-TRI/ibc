@@ -143,6 +143,8 @@ class ParticleEnv(gym.Env):
 
   def seed(self, seed=None):
     print(f"particle_env.seed({seed})")
+    # HACK
+    assert seed == 0
     self._rng = np.random.RandomState(seed=seed)
 
   def reset(self):
@@ -155,10 +157,15 @@ class ParticleEnv(gym.Env):
     self.new_actions = []
 
     obs = dict()
-    obs['pos_agent'] = self._rng.rand(self.n_dim).astype(np.float32)
+    # HACK
+    assert self.n_dim == 2
+    # obs['pos_agent'] = self._rng.rand(self.n_dim).astype(np.float32)
+    obs['pos_agent'] = np.array([0.0, 0.0]).astype(np.float32)
     obs['vel_agent'] = np.zeros((self.n_dim)).astype(np.float32)
-    obs['pos_first_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
-    obs['pos_second_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
+    obs['pos_first_goal'] = np.array([0.25, 0.75]).astype(np.float32)
+    obs['pos_second_goal'] = np.array([0.75, 0.25]).astype(np.float32)
+    # obs['pos_first_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
+    # obs['pos_second_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
 
     self.obs_log.append(obs)
 
