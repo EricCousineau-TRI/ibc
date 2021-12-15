@@ -21,7 +21,7 @@ ImplicitBCAgent.num_counter_examples = 8
 train_eval.num_iterations = 40
 train_eval.replay_capacity = 200
 train_eval.eval_interval = 40
-train_eval.fused_train_steps = 2
+train_eval.fused_train_steps = 1
 train_eval.checkpoint_interval = 40
 train_eval.learning_rate = 1e-3
 train_eval.goal_tolerance = 0.02
@@ -39,6 +39,7 @@ IbcPolicy.use_dfo = True
 IbcPolicy.use_langevin = False
 ImplicitBCAgent.fraction_dfo_samples = 0.0
 ImplicitBCAgent.fraction_langevin_samples = 0.0
+ImplicitBCAgent.summarize_grads_and_vars = True
 IbcPolicy.optimize_again = False
 
 # Configs for cloning net.

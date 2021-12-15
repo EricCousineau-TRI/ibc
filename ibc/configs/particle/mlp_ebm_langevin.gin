@@ -41,6 +41,7 @@ IbcPolicy.use_langevin = True
 IbcPolicy.optimize_again = False
 ImplicitBCAgent.fraction_dfo_samples = 0.0
 ImplicitBCAgent.fraction_langevin_samples = 1.0
+ImplicitBCAgent.summarize_grads_and_vars = True
 
 # Configs for cloning net.
 MLPEBM.layers = 'MLPDropout'
