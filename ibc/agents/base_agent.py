@@ -33,6 +33,7 @@ class BehavioralCloningAgent(tf_agent.TFAgent):
             training=False):
     raise NotImplementedError("Implement in subclass.")
 
+  @tf.function
   def _train(self,
              experience,
              weights = None):
@@ -49,12 +50,19 @@ class BehavioralCloningAgent(tf_agent.TFAgent):
     grads_and_vars = list(zip(grads, variables_to_train))
 
     if self._summarize_grads_and_vars:
-      grads_and_vars_with_non_trainable = (
-          grads_and_vars + [(None, v) for v in non_trainable_weights])
-      eager_utils.add_variables_summaries(grads_and_vars_with_non_trainable,
-                                          self.train_step_counter)
-      eager_utils.add_gradients_summaries(grads_and_vars,
-                                          self.train_step_counter)
+      should_log = False
+      if self.train_step_counter == 0:
+        should_log = True
+      elif (self.train_step_counter + 1) % 10 == 0:
+        should_log = True
+
+      if should_log:
+        grads_and_vars_with_non_trainable = (
+            grads_and_vars + [(None, v) for v in non_trainable_weights])
+        eager_utils.add_variables_summaries(grads_and_vars_with_non_trainable,
+                                            self.train_step_counter)
+        eager_utils.add_gradients_summaries(grads_and_vars,
+                                            self.train_step_counter)
 
     self._optimizer.apply_gradients(grads_and_vars)
     self.train_step_counter.assign_add(1)

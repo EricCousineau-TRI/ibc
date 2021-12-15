@@ -24,6 +24,7 @@ from absl import app
 from absl import flags
 from absl import logging
 import gin
+from ibc import __path__ as ibc_paths
 from ibc.environments.block_pushing import block_pushing  # pylint: disable=unused-import
 from ibc.environments.block_pushing import block_pushing_discontinuous  # pylint: disable=unused-import
 from ibc.environments.particle import particle  # pylint: disable=unused-import
@@ -389,7 +390,10 @@ def main(_):
   wandb.init(
     project="google-research-ibc",
     sync_tensorboard=True,
-    magic=True,
+    settings=wandb.Settings(
+      code_dir=ibc_paths[0],
+      quiet=True,
+    )
   )
   # Print operative gin config to stdout so wandb can intercept.
   # (it'd be nice for gin to provide a flat/nested dictionary of values so they
