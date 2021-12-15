@@ -70,7 +70,7 @@ tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.0
 tensorflow==2.6.0
 tensorflow-estimator==2.7.0
-tensorflow-probability==0.15.0
+tensorflow-probability==0.14.1
 termcolor==1.1.0
 -e git+ssh://git@github.com/EricCousineau-TRI/agents.git@cccb29735170fc0761d19922c2546958aea1bb2a#egg=tf_agents
 tf-agents-nightly==0.10.0.dev20211215
