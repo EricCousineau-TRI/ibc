@@ -280,6 +280,14 @@ def train_eval(
           # A seed with spread-out goals is more clear to visualize.
           # eval_env.seed(42)
           eval_env.seed(0)  # HACK
+          info = particle.NetInfo(
+            net=agent.cloning_network,
+            obs_norm=norm_info.obs_norm_layer,
+            act_norm=norm_info.act_norm_layer,
+            obs_spec=obs_tensor_spec,
+            act_spec=action_tensor_spec,
+          )
+          eval_env.set_network(info)
         # Write one eval video.
         video_module.make_video(
             agent,
@@ -304,7 +312,7 @@ def train_eval(
 
     mcmc.HACK = False
 
-  # do_eval()
+  do_eval()
 
   # Main train and eval loop.
   while train_step.numpy() < num_iterations:

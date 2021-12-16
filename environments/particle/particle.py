@@ -17,6 +17,7 @@
 
 import collections
 import copy
+import dataclasses as dc
 import os
 from typing import Union
 
@@ -28,6 +29,15 @@ from ibc.environments.particle import particle_metrics
 from ibc.environments.particle import particle_viz
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+@dc.dataclass
+class NetInfo:
+  net: object
+  obs_norm: object
+  act_norm: object
+  obs_spec: object
+  act_spec: object
 
 
 @gin.configurable
@@ -121,6 +131,7 @@ class ParticleEnv(gym.Env):
     self.action_space = spaces.Box(low=0., high=1., shape=(self.n_dim,),
                                    dtype=np.float32)
     self.observation_space = self._create_observation_space()
+    self._net_info = None
     self.reset()
 
   def _create_observation_space(self):
@@ -146,6 +157,9 @@ class ParticleEnv(gym.Env):
     # HACK
     assert seed == 0
     self._rng = np.random.RandomState(seed=seed)
+
+  def set_network(self, net_info):
+    self._net_info = net_info
 
   def reset(self):
     self.reset_counter += 1
@@ -240,7 +254,7 @@ class ParticleEnv(gym.Env):
     fig = plt.figure()
     fig.add_subplot(111)
     if self.n_dim == 2:
-      fig, _ = particle_viz.visualize_2d(self.obs_log, self.act_log)
+      fig, _ = particle_viz.visualize_2d(self.obs_log, self.act_log, net_info=self._net_info)
     else:
       fig, _ = particle_viz.visualize_nd(self.obs_log, self.act_log)
     fig.canvas.draw()

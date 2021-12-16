@@ -18,6 +18,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+import tensorflow as tf
+import einops
+
+from tf_agents.utils import nest_utils
 
 def make_vector(step):
   """step is either an obs or an act."""
@@ -32,8 +36,44 @@ def make_vector_traj(log):
   return np.array(vector_traj)
 
 
+def plot_particle_2d_ebm(
+    info, obs, *, grid_size, alpha=None, temperature=1.0
+):
+  action_x = tf.linspace(0.0, 1.0, num=grid_size)
+  action_y = tf.linspace(0.0, 1.0, num=grid_size)
+  action_y_grid, action_x_grid = tf.meshgrid(action_x, action_y)
+
+  action_xs = einops.rearrange(action_x_grid, "H W -> (H W)")
+  action_ys = einops.rearrange(action_y_grid, "H W -> (H W)")
+  ys = einops.rearrange([action_xs, action_ys], "C N -> N C")
+  N = ys.shape[0]
+
+  def reshape_obs(x):
+    return einops.repeat(x, "D -> N 1 D", N=N)
+
+  obs_norm, _ = info.obs_norm(obs)
+  obs_norm = tf.nest.map_structure(reshape_obs, obs_norm)
+  yhs = info.act_norm(ys)
+
+  Z_grid, _ = info.net((obs_norm, yhs))
+
+  # Show probabilities used for sampling.
+  Z_grid = tf.nn.softmax(Z_grid / temperature, axis=0)
+  Z_grid, _ = tf.linalg.normalize(Z_grid, axis=0)
+  Z_grid = einops.rearrange(Z_grid, "(H W) -> H W", H=grid_size)
+  mesh = plt.pcolormesh(
+    action_x_grid.numpy(),
+    action_y_grid.numpy(),
+    Z_grid.numpy(),
+    cmap="cool",
+    alpha=alpha,
+    shading="auto",
+  )
+  return mesh
+
+
 def visualize_2d(
-    obs_log, act_log, ax=None, fig=None, show=False, last_big=False):
+    obs_log, act_log, *, net_info=None, ax=None, fig=None, show=False, last_big=False):
   """If the environment is 2d, render a top-down image."""
 
   # Assert it's 2D
@@ -44,6 +84,9 @@ def visualize_2d(
     ax.set_aspect('equal')
     ax.set_xlim(0., 1.)
     ax.set_ylim(0., 1.)
+
+  if net_info is not None:
+    plot_particle_2d_ebm(net_info, obs_log[-1], grid_size=50)
 
   # Since when render is called we don't know what the actions will be,
   # We may need to ignore the last obs.
