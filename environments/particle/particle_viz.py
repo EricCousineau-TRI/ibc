@@ -57,9 +57,9 @@ def plot_particle_2d_ebm(
 
   Z_grid, _ = info.net((obs_norm, yhs))
 
-  print(f"min energy: {tf.reduce_min(Z_grid)}")
-  print(f"max energy: {tf.reduce_max(Z_grid)}")
-  print()
+  # print(f"min energy: {tf.reduce_min(Z_grid)}")
+  # print(f"max energy: {tf.reduce_max(Z_grid)}")
+  # print()
 
   # Show probabilities used for sampling.
   Z_grid = tf.nn.softmax(Z_grid / temperature, axis=0)
