@@ -39,9 +39,10 @@ from tf_agents.utils import nest_utils
 
 def add_tensor_summaries(d, prefix, xs):
   # Much simpler version of generate_tensor_summaries.
-  d[f"{prefix}.min"] = tf.reduce_min(xs)
-  d[f"{prefix}.avg"] = tf.reduce_mean(xs)
-  d[f"{prefix}.max"] = tf.reduce_max(xs)
+  d[f"{prefix}.mean"] = tf.math.reduce_mean(xs)
+  d[f"{prefix}.std"] = tf.math.reduce_std(xs)
+  # d[f"{prefix}.min"] = tf.math.reduce_min(xs)
+  # d[f"{prefix}.max"] = tf.math.reduce_max(xs)
 
 
 @gin.configurable
