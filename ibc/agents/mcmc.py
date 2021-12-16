@@ -222,7 +222,7 @@ def langevin_step(energy_network,
                   grad_norm_type,
                   obs_encoding):
   """Single step of Langevin update."""
-  l_lambda = 1.0
+  # l_lambda = 1.0
   # Langevin dynamics step
   de_dact, energies = gradient_wrt_act(energy_network,
                                        observations,
@@ -245,9 +245,12 @@ def langevin_step(energy_network,
   if grad_clip is not None:
     de_dact = tf.clip_by_value(de_dact, -grad_clip, grad_clip)
   gradient_scale = 0.5  # this is in the Langevin dynamics equation.
-  de_dact = (gradient_scale * l_lambda * de_dact +
-             tf.random.normal(tf.shape(actions)) * l_lambda * noise_scale)
-  delta_actions = stepsize * de_dact
+  # de_dact = (gradient_scale * l_lambda * de_dact +
+  #            tf.random.normal(tf.shape(actions)) * l_lambda * noise_scale)
+  # delta_actions = stepsize * de_dact
+  assert noise_scale == 1.0
+  action_noise = tf.random.normal(tf.shape(actions))
+  delta_actions = -stepsize * (0.5 * de_dact + action_noise)
 
   # Clip to box.
   delta_actions = tf.clip_by_value(delta_actions, -delta_action_clip,
@@ -256,7 +259,8 @@ def langevin_step(energy_network,
   # delta_actions = tf.clip_by_norm(
   #  delta_actions, delta_action_clip, axes=[1])
 
-  actions = actions - delta_actions
+  # actions = actions - delta_actions
+  actions = actions + delta_actions
   actions = tf.clip_by_value(actions,
                              min_actions,
                              max_actions)
