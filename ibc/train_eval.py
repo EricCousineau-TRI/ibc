@@ -261,6 +261,8 @@ def train_eval(
     f.write(gin.operative_config_str())
 
   def do_eval():
+    mcmc.HACK = True
+
     all_metrics = []
     for eval_env, eval_actor, env_name, success_metric in zip(
         eval_envs, eval_actors, env_names, eval_success_metrics):
@@ -300,7 +302,9 @@ def train_eval(
             data=sum(value) / len(value),
             step=train_step)
 
-  do_eval()
+    mcmc.HACK = False
+
+  # do_eval()
 
   # Main train and eval loop.
   while train_step.numpy() < num_iterations:

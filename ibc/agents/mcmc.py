@@ -28,6 +28,8 @@ from tf_agents.utils import nest_utils
 # that use this.
 my_range = tf.range
 
+HACK = False
+
 
 @tf.function
 def categorical_bincount(count, log_ps, n):
