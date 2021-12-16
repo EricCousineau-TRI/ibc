@@ -37,7 +37,7 @@ def make_vector_traj(log):
 
 
 def plot_particle_2d_ebm(
-    info, obs, *, grid_size, alpha=None, temperature=1.0
+    info, obs, *, grid_size, alpha=None, temperature=10.0
 ):
   action_x = tf.linspace(0.0, 1.0, num=grid_size)
   action_y = tf.linspace(0.0, 1.0, num=grid_size)
@@ -56,6 +56,10 @@ def plot_particle_2d_ebm(
   yhs = info.act_norm(ys)
 
   Z_grid, _ = info.net((obs_norm, yhs))
+
+  print(f"min energy: {tf.reduce_min(Z_grid)}")
+  print(f"max energy: {tf.reduce_max(Z_grid)}")
+  print()
 
   # Show probabilities used for sampling.
   Z_grid = tf.nn.softmax(Z_grid / temperature, axis=0)
