@@ -62,5 +62,11 @@ grad_penalty.only_apply_final_grad_penalty = True # Note:
 # investigate if can lessen memory.
 ImplicitBCAgent.run_full_chain_under_gradient = False
 
-langevin_actions_given_obs.num_iterations = 100
 ImplicitBCAgent.fraction_langevin_samples = 1.0
+
+langevin_actions_given_obs.num_iterations = 100
+langevin_actions_given_obs.sampler_stepsize_init = 0.1
+langevin_actions_given_obs.sampler_stepsize_final = 1.0e-5
+langevin_actions_given_obs.sampler_stepsize_power = 2.0
+langevin_actions_given_obs.noise_scale = 1.0
+langevin_actions_given_obs.delta_action_clip = 0.1
