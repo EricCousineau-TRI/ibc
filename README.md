@@ -35,7 +35,8 @@ pip install \
   keras==2.6.0 \
   tqdm==4.62.2 \
   wandb==0.12.7 \
-  tensorflow-probability==0.14.1
+  tensorflow-probability==0.14.1 \
+  einops==0.3.2
   # tf-agents==0.11.0rc0 \
 pip install -e ~/devel/tf_agents
 ```
