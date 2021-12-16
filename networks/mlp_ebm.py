@@ -63,11 +63,17 @@ class MLPEBM(network.Network):
           hidden_sizes, rate, kernel_initializer, bias_initializer,
           dense, activation)
 
+    # def my_init(shape, dtype=None, **kwargs):
+    #   assert shape == [1], shape
+    #   return tf.constant([0.03], dtype=dtype)
+
     # Define projection to energy.
     self._project_energy = dense(
         action_spec.shape[-1],
         kernel_initializer=kernel_initializer,
-        bias_initializer=bias_initializer)
+        bias_initializer=bias_initializer,
+        # bias_initializer=my_init,
+    )
 
   def call(self, inputs, training, step_type=(), network_state=()):
     # obs: dict of named obs_spec.
@@ -89,6 +95,8 @@ class MLPEBM(network.Network):
 
     # Project to energy.
     x = self._project_energy(x, training=training)
+
+    # tf.print(self._project_energy.bias)
 
     # Squeeze extra dim.
     x = tf.squeeze(x, axis=-1)
