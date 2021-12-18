@@ -72,6 +72,7 @@ flags.DEFINE_bool('multi_gpu', False,
 
 flags.DEFINE_enum('device_type', 'gpu', ['gpu', 'tpu'],
                   'Where to perform training.')
+flags.DEFINE_bool('eager', False, 'Run in eager (useful for richer debugging)')
 
 FLAGS = flags.FLAGS
 VIZIER_KEY = 'success'
@@ -419,9 +420,10 @@ def main(_):
       tpu=FLAGS.tpu, use_gpu=FLAGS.use_gpu)
 
   task = FLAGS.task or gin.REQUIRED
-  # # If setting this to True, change `my_range` in mcmc.py to `= range`
-  # tf.config.run_functions_eagerly(True)
-  # mcmc.my_range = range
+  # If setting this to True, change `my_range` in mcmc.py to `= range`
+  if FLAGS.eager:
+    tf.config.run_functions_eagerly(True)
+    mcmc.my_range = range
 
   train_eval(
       task=task,
