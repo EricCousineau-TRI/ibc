@@ -30,7 +30,7 @@ train_eval.sequence_length = 1
 train_eval.dataset_eval_fraction = 0.0
 
 IbcPolicy.num_action_samples = 512
-train_eval.uniform_boundary_buffer = 0.05
+train_eval.uniform_boundary_buffer = 0.1
 get_normalizers.nested_obs = True  # Particle has nested
 get_normalizers.num_samples = 100
 compute_dataset_statistics.min_max_actions = True
