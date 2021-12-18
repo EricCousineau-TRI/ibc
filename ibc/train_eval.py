@@ -313,7 +313,7 @@ def train_eval(
 
     mcmc.HACK = False
 
-  do_eval()
+  # do_eval()
 
   # Main train and eval loop.
   while train_step.numpy() < num_iterations:
