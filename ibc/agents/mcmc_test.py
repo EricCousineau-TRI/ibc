@@ -208,25 +208,33 @@ class McmcTest(tf.test.TestCase):
     print()
 
     count = 100
-    num_iter = 100
+    # num_iter = 100
 
     t_start = None
     for _ in range(count + 1):
-      action_samples = mcmc.langevin_actions_given_obs(
-          energy_network,
-          obs,
-          init_action_samples,
-          policy_state=(),
-          min_actions=np.array([0., 0.]).astype(np.float32),
-          max_actions=np.array([1., 1.]).astype(np.float32),
-          training=False,
-          num_iterations=num_iter,
-          num_action_samples=num_action_samples,
-          tfa_step_type=())
+      de_dact = mcmc.gradient_wrt_act(
+        energy_network,
+        obs,
+        init_action_samples,
+        training=False,
+        network_state=(),
+        tfa_step_type=(),
+        apply_exp=False)
+      # action_samples = mcmc.langevin_actions_given_obs(
+      #     energy_network,
+      #     obs,
+      #     init_action_samples,
+      #     policy_state=(),
+      #     min_actions=np.array([0., 0.]).astype(np.float32),
+      #     max_actions=np.array([1., 1.]).astype(np.float32),
+      #     training=False,
+      #     num_iterations=num_iter,
+      #     num_action_samples=num_action_samples,
+      #     tfa_step_type=())
       if t_start is None:
         t_start = time.time()
     dt = time.time() - t_start
-    print(dt / (count * num_iter))
+    print(dt / count)
     print("\n\n")
 
 
