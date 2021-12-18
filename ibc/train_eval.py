@@ -318,7 +318,9 @@ def train_eval(
   # Main train and eval loop.
   while train_step.numpy() < num_iterations:
     # Run bc_learner for fused_train_steps.
+    mcmc.TRAIN = True
     training_step(agent, bc_learner, fused_train_steps, train_step)
+    mcmc.TRAIN = False
 
     if (dist_eval_data_iter is not None and
         train_step.numpy() % eval_loss_interval == 0):

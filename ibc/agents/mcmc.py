@@ -29,6 +29,7 @@ from tf_agents.utils import nest_utils
 my_range = tf.range
 
 HACK = False
+TRAIN = False
 
 
 @tf.function
