@@ -23,7 +23,7 @@ def gradient(f, x):
   return df_dx
 
 
-# @tf.function
+@tf.function
 def fake_langevin(net, yhs, num_iter):
   out = tf.zeros_like(yhs)
   for _ in range(num_iter):
@@ -43,6 +43,7 @@ def test_profile():
   net = make_mlp([256, 256])
   net(yhs)
   print(net.summary())
+  # net = tf.function(net)
 
   count = 10
   num_iter = 100
@@ -63,7 +64,7 @@ def test_profile():
 
 @debug.iex
 def main():
-  tf.config.run_functions_eagerly(True)
+  tf.config.run_functions_eagerly(False)
   test_profile()
 
 
