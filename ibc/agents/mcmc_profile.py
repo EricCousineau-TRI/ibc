@@ -1,3 +1,8 @@
+import os
+os.environ.update(
+  CUDA_LAUNCH_BLOCKING="1",
+)
+
 import time
 
 import numpy as np
@@ -23,13 +28,12 @@ def gradient(f, x):
   return df_dx
 
 
-@tf.function
+# @tf.function
 def fake_langevin(net, yhs, num_iter):
-  out = tf.zeros_like(yhs)
   for _ in range(num_iter):
     de_dact = gradient(net, yhs)
-    out += de_dact
-  return out
+    yhs = yhs + de_dact * 0.1
+  return yhs
 
 
 def test_profile():
@@ -51,8 +55,8 @@ def test_profile():
   t_start = None
   for _ in range(count + 1):
 
-    out = fake_langevin(net, yhs, num_iter)
-    out = out.numpy()
+    yhs_new = fake_langevin(net, yhs, num_iter)
+    yhs_new = yhs_new.numpy()
 
     if t_start is None:
       t_start = time.time()
@@ -64,6 +68,8 @@ def test_profile():
 
 @debug.iex
 def main():
+  device, = tf.config.list_physical_devices('GPU')
+  tf.config.experimental.set_memory_growth(device, True)
   tf.config.run_functions_eagerly(False)
   test_profile()
 
