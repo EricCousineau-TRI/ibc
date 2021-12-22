@@ -264,6 +264,7 @@ class IbcPolicy(tf_policy.TFPolicy):
         self._action_sampling_spec,
         outer_dims=(batch_size * self._num_action_samples,))
 
+    t_start = tf.timestamp()
     # MCMC.
     probs = 0
     if self._use_dfo:
@@ -322,7 +323,14 @@ class IbcPolicy(tf_policy.TFPolicy):
       if isinstance(self._act_denorm_layer, nest_map.NestMap):
         action_samples, _ = action_samples
 
+    dt = tf.timestamp() - t_start
+    if mcmc.HACK:
+      tf.print(dt)
+
     # Make a distribution for sampling.
     distribution = MappedCategorical(
         probs=probs, mapped_values=action_samples)
     return policy_step.PolicyStep(distribution, policy_state)
+
+
+import time

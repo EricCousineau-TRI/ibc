@@ -19,6 +19,7 @@ import collections
 import copy
 import dataclasses as dc
 import os
+import time
 from typing import Union
 
 import gin
@@ -185,6 +186,7 @@ class ParticleEnv(gym.Env):
 
     self.min_dist_to_first_goal = np.inf
     self.min_dist_to_second_goal = np.inf
+    self._t_prev = None
     return self._get_state()
 
   def _get_state(self):
@@ -248,6 +250,13 @@ class ParticleEnv(gym.Env):
     state = self._get_state()
     done = True if self.steps >= self.n_steps else False
     reward = self._get_reward(done)
+
+    t_now = time.time()
+    if self._t_prev is not None:
+      dt = t_now - self._t_prev
+      print(f"env dt: {dt}")
+    self._t_prev = t_now
+
     return state, reward, done, {}
 
   def render(self, mode='rgb_array'):
