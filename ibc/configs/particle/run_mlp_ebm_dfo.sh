@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ## Use "N" of the N-d environment as the arg
+set -eu
 
 python3 ibc/ibc/train_eval.py -- \
   --alsologtostderr \

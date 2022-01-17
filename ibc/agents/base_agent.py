@@ -59,9 +59,9 @@ class BehavioralCloningAgent(tf_agent.TFAgent):
       if should_log:
         grads_and_vars_with_non_trainable = (
             grads_and_vars + [(None, v) for v in non_trainable_weights])
-        buckets = 512
+        # buckets = 512
         eager_utils.add_variables_summaries(grads_and_vars_with_non_trainable,
-                                            self.train_step_counter, buckets=buckets)
+                                            self.train_step_counter) #, buckets=buckets)
         # eager_utils.add_gradients_summaries(grads_and_vars,
         #                                     self.train_step_counter, buckets=buckets)
 

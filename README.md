@@ -36,9 +36,9 @@ pip install \
   tqdm==4.62.2 \
   wandb==0.12.7 \
   tensorflow-probability==0.14.1 \
+  tf-agents==0.11.0rc0 \
   einops==0.3.2
-  # tf-agents==0.11.0rc0 \
-pip install -e ~/devel/tf_agents
+# pip install -e ~/devel/tf_agents
 ```
 
 (Optional): For Mujoco support, see [`docs/mujoco_setup.md`](docs/mujoco_setup.md).  Recommended to skip it

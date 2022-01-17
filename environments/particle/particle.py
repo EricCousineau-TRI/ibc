@@ -155,8 +155,6 @@ class ParticleEnv(gym.Env):
 
   def seed(self, seed=None):
     print(f"particle_env.seed({seed})")
-    # HACK
-    assert seed == 0
     self._rng = np.random.RandomState(seed=seed)
 
   def set_network(self, net_info):
@@ -172,15 +170,10 @@ class ParticleEnv(gym.Env):
     self.new_actions = []
 
     obs = dict()
-    # HACK
-    assert self.n_dim == 2
-    # obs['pos_agent'] = self._rng.rand(self.n_dim).astype(np.float32)
-    obs['pos_agent'] = np.array([0.0, 0.0]).astype(np.float32)
+    obs['pos_agent'] = self._rng.rand(self.n_dim).astype(np.float32)
     obs['vel_agent'] = np.zeros((self.n_dim)).astype(np.float32)
-    obs['pos_first_goal'] = np.array([0.25, 0.75]).astype(np.float32)
-    obs['pos_second_goal'] = np.array([0.75, 0.25]).astype(np.float32)
-    # obs['pos_first_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
-    # obs['pos_second_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
+    obs['pos_first_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
+    obs['pos_second_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
 
     self.obs_log.append(obs)
 
@@ -254,7 +247,6 @@ class ParticleEnv(gym.Env):
     t_now = time.time()
     if self._t_prev is not None:
       dt = t_now - self._t_prev
-      print(f"env dt: {dt}")
     self._t_prev = t_now
 
     return state, reward, done, {}

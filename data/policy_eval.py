@@ -189,8 +189,6 @@ def evaluate(num_episodes,
             py_mode=True,
             compress_image=True))
 
-  env.seed(0)  # HACK
-
   if video:
     env = video_module.make_video_env(env, video_path)
 
