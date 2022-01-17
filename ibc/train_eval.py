@@ -395,6 +395,10 @@ def get_distributed_eval_data(data_fn, strategy):
 def main(_):
   logging.set_verbosity(logging.INFO)
 
+  devices = tf.config.list_physical_devices('GPU')
+  for device in devices:
+      tf.config.experimental.set_memory_growth(device, True)
+
   gin.add_config_file_search_path(os.getcwd())
   gin.parse_config_files_and_bindings(FLAGS.gin_file, FLAGS.gin_bindings,
                                       # TODO(coreylynch): This is a temporary
