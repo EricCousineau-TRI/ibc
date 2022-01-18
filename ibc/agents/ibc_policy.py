@@ -324,8 +324,8 @@ class IbcPolicy(tf_policy.TFPolicy):
         action_samples, _ = action_samples
 
     dt = tf.timestamp() - t_start
-    if mcmc.HACK:
-      tf.print(dt)
+    # if mcmc.HACK:
+    #   tf.print(dt)
 
     # Make a distribution for sampling.
     distribution = MappedCategorical(
