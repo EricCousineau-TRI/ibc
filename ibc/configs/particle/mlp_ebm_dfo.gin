@@ -16,12 +16,13 @@
 train_eval.root_dir = '/tmp/ibc_logs/mlp_ebm_dfo'
 train_eval.loss_type = 'ebm' # specifies we are training ebm.
 train_eval.network = 'MLPEBM'
-train_eval.batch_size = 512
+train_eval.batch_size = 32
 ImplicitBCAgent.num_counter_examples = 8
-train_eval.num_iterations = 100000
-train_eval.replay_capacity = 10000
-train_eval.eval_interval = 1000
-train_eval.eval_episodes = 5
+train_eval.num_iterations = 150
+train_eval.replay_capacity = 1
+train_eval.eval_interval = 50
+train_eval.fused_train_steps = 1
+train_eval.checkpoint_interval = 50
 train_eval.learning_rate = 1e-3
 train_eval.goal_tolerance = 0.02
 train_eval.seed = 0
@@ -31,7 +32,7 @@ train_eval.dataset_eval_fraction = 0.0
 IbcPolicy.num_action_samples = 512
 train_eval.uniform_boundary_buffer = 0.05
 get_normalizers.nested_obs = True  # Particle has nested
-get_normalizers.num_samples = 5000
+get_normalizers.num_samples = 100
 compute_dataset_statistics.min_max_actions = True
 
 IbcPolicy.use_dfo = True
