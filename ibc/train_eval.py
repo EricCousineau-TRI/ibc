@@ -262,7 +262,8 @@ def train_eval(
     f.write(gin.operative_config_str())
 
   def do_eval():
-    # mcmc.HACK = True
+    if mcmc.OVERFIT:
+      mcmc.HACK = True
 
     all_metrics = []
     for eval_env, eval_actor, env_name, success_metric in zip(
@@ -279,8 +280,11 @@ def train_eval(
       if FLAGS.video and 'kitchen' not in task:
         if 'PARTICLE' in task:
           # A seed with spread-out goals is more clear to visualize.
-          eval_env.seed(42)
-          # eval_env.seed(0)  # HACK
+          if mcmc.OVERFIT:
+            eval_env.seed(0)
+          else:
+            eval_env.seed(42)
+
           info = particle.NetInfo(
             net=agent.cloning_network,
             obs_norm=norm_info.obs_norm_layer,
@@ -311,7 +315,7 @@ def train_eval(
             data=sum(value) / len(value),
             step=train_step)
 
-    # mcmc.HACK = False
+    mcmc.HACK = False
 
   # do_eval()
 

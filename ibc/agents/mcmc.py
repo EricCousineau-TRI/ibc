@@ -28,6 +28,8 @@ from tf_agents.utils import nest_utils
 # that use this.
 my_range = tf.range
 
+OVERFIT = True
+
 HACK = False
 TRAIN = False
 

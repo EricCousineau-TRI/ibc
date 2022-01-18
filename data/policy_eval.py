@@ -32,6 +32,7 @@ from ibc.environments.collect.utils import get_oracle as get_oracle_module
 from ibc.environments.particle import particle  # pylint: disable=unused-import
 from ibc.environments.particle import particle_oracles
 from ibc.ibc.agents import ibc_policy  # pylint: disable=unused-import
+from ibc.ibc.agents import mcmc
 from ibc.ibc.utils import make_video as video_module
 from tf_agents.drivers import py_driver
 from tf_agents.environments import suite_gym
@@ -188,6 +189,9 @@ def evaluate(num_episodes,
             policy.collect_data_spec,
             py_mode=True,
             compress_image=True))
+
+  if mcmc.OVERFIT:
+    env.seed(0)
 
   if video:
     env = video_module.make_video_env(env, video_path)
