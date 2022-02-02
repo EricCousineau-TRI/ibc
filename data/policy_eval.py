@@ -31,6 +31,8 @@ from ibc.environments.block_pushing import block_pushing_multimodal
 from ibc.environments.collect.utils import get_oracle as get_oracle_module
 from ibc.environments.particle import particle  # pylint: disable=unused-import
 from ibc.environments.particle import particle_oracles
+from ibc.ibc.agents import ibc_policy  # pylint: disable=unused-import
+from ibc.ibc.utils import make_video as video_module
 from tf_agents.drivers import py_driver
 from tf_agents.environments import suite_gym
 from tf_agents.environments import wrappers
@@ -187,7 +189,12 @@ def evaluate(num_episodes,
             py_mode=True,
             compress_image=True))
 
+
+  if video:
+    env = video_module.make_video_env(env, video_path)
+
   driver = py_driver.PyDriver(env, policy, observers, max_episodes=num_episodes)
+
   time_step = env.reset()
   initial_policy_state = policy.get_initial_state(1)
   driver.run(time_step, initial_policy_state)
@@ -209,10 +216,12 @@ def main(_):
       raise ValueError(
           'A dataset_path must be provided when replicas are specified.')
     dataset_split_path = os.path.splitext(flags.FLAGS.dataset_path)
+    output_split_path = os.path.splitext(flags.FLAGS.output_path)
     context = multiprocessing.get_context()
 
     for i in range(flags.FLAGS.replicas):
       dataset_path = dataset_split_path[0] + '_%d' % i + dataset_split_path[1]
+      output_path = output_split_path[0] + '_%d' % i + output_split_path[1]
       kwargs = dict(
           num_episodes=flags.FLAGS.num_episodes,
           task=flags.FLAGS.task,
@@ -223,7 +232,9 @@ def main(_):
           checkpoint_path=flags.FLAGS.checkpoint_path,
           static_policy=flags.FLAGS.policy,
           dataset_path=dataset_path,
-          history_length=flags.FLAGS.history_length
+          history_length=flags.FLAGS.history_length,
+          video=flags.FLAGS.video,
+          output_path=output_path,
       )
       job = context.Process(target=evaluate, kwargs=kwargs)
       job.start()

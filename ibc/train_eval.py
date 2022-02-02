@@ -24,6 +24,7 @@ from absl import app
 from absl import flags
 from absl import logging
 import gin
+from ibc import __path__ as ibc_paths
 from ibc.environments.block_pushing import block_pushing  # pylint: disable=unused-import
 from ibc.environments.block_pushing import block_pushing_discontinuous  # pylint: disable=unused-import
 from ibc.environments.particle import particle  # pylint: disable=unused-import
@@ -44,6 +45,7 @@ from tf_agents.train.utils import spec_utils
 from tf_agents.train.utils import strategy_utils
 from tf_agents.train.utils import train_utils
 from tf_agents.utils import common
+import wandb
 
 flags.DEFINE_string('tag', None,
                     'Tag for the experiment. Appended to the root_dir.')
@@ -69,6 +71,7 @@ flags.DEFINE_bool('multi_gpu', False,
 
 flags.DEFINE_enum('device_type', 'gpu', ['gpu', 'tpu'],
                   'Where to perform training.')
+flags.DEFINE_bool('eager', False, 'Run in eager (useful for richer debugging)')
 
 FLAGS = flags.FLAGS
 VIZIER_KEY = 'success'
@@ -111,7 +114,8 @@ def train_eval(
     # Use this to sweep amount of tfrecords going into training.
     # -1 for 'use all'.
     max_data_shards=-1,
-    use_warmup=False):
+    use_warmup=False,
+    checkpoint_interval=5000):
   """Trains a BC agent on the given datasets."""
   if task is None:
     raise ValueError('task argument must be set.')
@@ -224,7 +228,8 @@ def train_eval(
         train_step,
         create_train_and_eval_fns,
         fused_train_steps,
-        strategy)
+        strategy,
+        checkpoint_interval)
 
     # Define eval.
     eval_actors, eval_success_metrics = [], []
@@ -255,6 +260,55 @@ def train_eval(
       os.path.join(root_dir, 'operative-gin-config.txt'), 'wb') as f:
     f.write(gin.operative_config_str())
 
+  def do_eval():
+
+    all_metrics = []
+    for eval_env, eval_actor, env_name, success_metric in zip(
+        eval_envs, eval_actors, env_names, eval_success_metrics):
+      # Run evaluation.
+      metrics = evaluation_step(
+          eval_episodes,
+          eval_env,
+          eval_actor,
+          name_scope_suffix=f'_{env_name}')
+      all_metrics.append(metrics)
+
+      # rendering on some of these envs is broken
+      if FLAGS.video and 'kitchen' not in task:
+        if 'PARTICLE' in task:
+          # A seed with spread-out goals is more clear to visualize.
+          eval_env.seed(42)
+
+          info = particle.NetInfo(
+            net=agent.cloning_network,
+            obs_norm=norm_info.obs_norm_layer,
+            act_norm=norm_info.act_norm_layer,
+            obs_spec=obs_tensor_spec,
+            act_spec=action_tensor_spec,
+          )
+          eval_env.set_network(info)
+        # Write one eval video.
+        video_module.make_video(
+            agent,
+            eval_env,
+            root_dir,
+            step=train_step.numpy(),
+            strategy=strategy)
+
+    metric_results = collections.defaultdict(list)
+    for env_metrics in all_metrics:
+      for metric in env_metrics:
+        metric_results[metric.name].append(metric.result())
+
+    with summary_writer.as_default(), \
+       common.soft_device_placement(), \
+       tf.summary.record_if(lambda: True):
+      for key, value in metric_results.items():
+        tf.summary.scalar(
+            name=os.path.join('AggregatedMetrics/', key),
+            data=sum(value) / len(value),
+            step=train_step)
+
   # Main train and eval loop.
   while train_step.numpy() < num_iterations:
     # Run bc_learner for fused_train_steps.
@@ -267,44 +321,7 @@ def train_eval(
           dist_eval_data_iter, bc_learner, train_step, get_eval_loss)
 
     if not skip_eval and train_step.numpy() % eval_interval == 0:
-
-      all_metrics = []
-      for eval_env, eval_actor, env_name, success_metric in zip(
-          eval_envs, eval_actors, env_names, eval_success_metrics):
-        # Run evaluation.
-        metrics = evaluation_step(
-            eval_episodes,
-            eval_env,
-            eval_actor,
-            name_scope_suffix=f'_{env_name}')
-        all_metrics.append(metrics)
-
-        # rendering on some of these envs is broken
-        if FLAGS.video and 'kitchen' not in task:
-          if 'PARTICLE' in task:
-            # A seed with spread-out goals is more clear to visualize.
-            eval_env.seed(42)
-          # Write one eval video.
-          video_module.make_video(
-              agent,
-              eval_env,
-              root_dir,
-              step=train_step.numpy(),
-              strategy=strategy)
-
-      metric_results = collections.defaultdict(list)
-      for env_metrics in all_metrics:
-        for metric in env_metrics:
-          metric_results[metric.name].append(metric.result())
-
-      with summary_writer.as_default(), \
-         common.soft_device_placement(), \
-         tf.summary.record_if(lambda: True):
-        for key, value in metric_results.items():
-          tf.summary.scalar(
-              name=os.path.join('AggregatedMetrics/', key),
-              data=sum(value) / len(value),
-              step=train_step)
+      do_eval()
 
   summary_writer.flush()
 
@@ -370,12 +387,29 @@ def get_distributed_eval_data(data_fn, strategy):
 def main(_):
   logging.set_verbosity(logging.INFO)
 
+  devices = tf.config.list_physical_devices('GPU')
+  for device in devices:
+      tf.config.experimental.set_memory_growth(device, True)
+
   gin.add_config_file_search_path(os.getcwd())
   gin.parse_config_files_and_bindings(FLAGS.gin_file, FLAGS.gin_bindings,
                                       # TODO(coreylynch): This is a temporary
                                       # hack until we get proper distributed
                                       # eval working. Remove it once we do.
                                       skip_unknown=True)
+
+  wandb.init(
+    project="google-research-ibc",
+    sync_tensorboard=True,
+    settings=wandb.Settings(
+      code_dir=ibc_paths[0],
+      quiet=True,
+    )
+  )
+  # Print operative gin config to stdout so wandb can intercept.
+  # (it'd be nice for gin to provide a flat/nested dictionary of values so they
+  # can be used via wandb's aggregation...)
+  print(gin.config.config_str())
 
   # For TPU, FLAGS.tpu will be set with a TPU address and FLAGS.use_gpu
   # will be False.
@@ -384,8 +418,10 @@ def main(_):
       tpu=FLAGS.tpu, use_gpu=FLAGS.use_gpu)
 
   task = FLAGS.task or gin.REQUIRED
-  # If setting this to True, change `my_rangea in mcmc.py to `= range`
-  tf.config.experimental_run_functions_eagerly(False)
+  # If setting this to True, change `my_range` in mcmc.py to `= range`
+  if FLAGS.eager:
+    tf.config.run_functions_eagerly(True)
+    mcmc.my_range = range
 
   train_eval(
       task=task,

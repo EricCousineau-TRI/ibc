@@ -33,8 +33,11 @@ pip install \
   scipy==1.7.1 \
   tensorflow==2.6.0 \
   keras==2.6.0 \
+  tqdm==4.62.2 \
+  wandb==0.12.7 \
+  tensorflow-probability==0.14.1 \
   tf-agents==0.11.0rc0 \
-  tqdm==4.62.2
+  einops==0.3.2
 ```
 
 (Optional): For Mujoco support, see [`docs/mujoco_setup.md`](docs/mujoco_setup.md).  Recommended to skip it
