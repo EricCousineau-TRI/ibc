@@ -26,6 +26,7 @@ from gym import spaces
 from gym.envs import registration
 from ibc.environments.particle import particle_metrics
 from ibc.environments.particle import particle_viz
+from ibc.ibc.agents import mcmc
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -142,6 +143,9 @@ class ParticleEnv(gym.Env):
     return spaces.Dict(obs_dict)
 
   def seed(self, seed=None):
+    print(f"particle_env.seed({seed})")
+    if mcmc.OVERFIT:
+      assert seed == 0
     self._rng = np.random.RandomState(seed=seed)
 
   def reset(self):
@@ -154,10 +158,18 @@ class ParticleEnv(gym.Env):
     self.new_actions = []
 
     obs = dict()
-    obs['pos_agent'] = self._rng.rand(self.n_dim).astype(np.float32)
+
+    if mcmc.OVERFIT:
+      assert self.n_dim == 2
+      obs['pos_agent'] = np.array([0.0, 0.0]).astype(np.float32)
+      obs['pos_first_goal'] = np.array([0.25, 0.75]).astype(np.float32)
+      obs['pos_second_goal'] = np.array([0.75, 0.25]).astype(np.float32)
+    else:
+      obs['pos_agent'] = self._rng.rand(self.n_dim).astype(np.float32)
+      obs['pos_first_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
+      obs['pos_second_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
+
     obs['vel_agent'] = np.zeros((self.n_dim)).astype(np.float32)
-    obs['pos_first_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
-    obs['pos_second_goal'] = self._rng.rand(self.n_dim).astype(np.float32)
 
     self.obs_log.append(obs)
 

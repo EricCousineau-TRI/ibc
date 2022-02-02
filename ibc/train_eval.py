@@ -277,7 +277,10 @@ def train_eval(
       if FLAGS.video and 'kitchen' not in task:
         if 'PARTICLE' in task:
           # A seed with spread-out goals is more clear to visualize.
-          eval_env.seed(42)
+          if mcmc.OVERFIT:
+            eval_env.seed(0)
+          else:
+            eval_env.seed(42)
 
           info = particle.NetInfo(
             net=agent.cloning_network,
