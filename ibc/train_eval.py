@@ -19,6 +19,7 @@ import collections
 import datetime
 import functools
 import os
+from os.path import abspath, dirname
 
 from absl import app
 from absl import flags
@@ -77,6 +78,8 @@ flags.DEFINE_bool('eager', False, 'Run in eager (useful for richer debugging)')
 
 FLAGS = flags.FLAGS
 VIZIER_KEY = 'success'
+
+SOURCE_DIR = dirname(dirname(abspath(__file__)))
 
 
 @gin.configurable
@@ -401,6 +404,19 @@ def get_distributed_eval_data(data_fn, strategy):
 
 @debug.iex
 def main(_):
+  cur_dir = os.getcwd()
+  # Hack for wandb to record git info. Dunno how to use `code_dir`.
+  os.chdir(SOURCE_DIR)
+  wandb.init(
+    project="google-research-ibc",
+    sync_tensorboard=True,
+    save_code=True,
+    settings=wandb.Settings(
+      quiet=True,
+    )
+  )
+  os.chdir(cur_dir)
+
   logging.set_verbosity(logging.INFO)
 
   devices = tf.config.list_physical_devices('GPU')
@@ -413,15 +429,6 @@ def main(_):
                                       # hack until we get proper distributed
                                       # eval working. Remove it once we do.
                                       skip_unknown=True)
-
-  wandb.init(
-    project="google-research-ibc",
-    sync_tensorboard=True,
-    settings=wandb.Settings(
-      code_dir=ibc_paths[0],
-      quiet=True,
-    )
-  )
   # Print operative gin config to stdout so wandb can intercept.
   # (it'd be nice for gin to provide a flat/nested dictionary of values so they
   # can be used via wandb's aggregation...)

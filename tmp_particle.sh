@@ -1,7 +1,6 @@
 #!/bin/bash
 cd $(dirname ${BASH_SOURCE})/..
-source ./ibc/venv/bin/activate
-export PYTHONPATH=${PWD}:${PYTHONPATH}
+source ./ibc/setup.sh
 
 set -eu
 ./ibc/ibc/configs/particle/collect_data.sh
