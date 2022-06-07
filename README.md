@@ -36,14 +36,14 @@ pip install \
   tensorflow==2.6.0 \
   keras==2.6.0 \
   tqdm==4.62.2 \
-  wandb==0.12.7 \
+  wandb==0.12.17 \
   tensorflow-probability==0.14.1 \
   tf-agents==0.11.0rc0 \
   einops==0.3.2 \
   protobuf==3.19.1 \
   gym==0.21.0
 # pip install -e ~/devel/tf_agents
-pip freeze > ./requirements.freeze.txt
+pip freeze --all > ./requirements.freeze.txt
 ```
 
 (Optional): For Mujoco support, see [`docs/mujoco_setup.md`](docs/mujoco_setup.md).  Recommended to skip it
