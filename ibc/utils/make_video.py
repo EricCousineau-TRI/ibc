@@ -47,3 +47,4 @@ def make_video(agent, env, root_dir, step, strategy):
   driver.run(time_step, initial_policy_state)
   video_env.close()  # Closes only the video env, not the underlying env.
   logging.info('Wrote video for step %d to %s', step, video_path)
+  return video_path

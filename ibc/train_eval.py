@@ -47,6 +47,7 @@ from tf_agents.train.utils import strategy_utils
 from tf_agents.train.utils import train_utils
 from tf_agents.utils import common
 import wandb
+from ibc.ibc.utils import debug
 
 flags.DEFINE_string('tag', None,
                     'Tag for the experiment. Appended to the root_dir.')
@@ -294,12 +295,14 @@ def train_eval(
           )
           eval_env.set_network(info)
         # Write one eval video.
-        video_module.make_video(
+        video_path = video_module.make_video(
             agent,
             eval_env,
             root_dir,
             step=train_step.numpy(),
             strategy=strategy)
+
+        wandb.save(video_path, policy="now")
 
     metric_results = collections.defaultdict(list)
     for env_metrics in all_metrics:
@@ -396,6 +399,7 @@ def get_distributed_eval_data(data_fn, strategy):
   return dist_eval_data_iter
 
 
+@debug.iex
 def main(_):
   logging.set_verbosity(logging.INFO)
 

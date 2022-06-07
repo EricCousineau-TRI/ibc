@@ -22,7 +22,9 @@ We find that across a wide range of robot policy learning scenarios, treating su
 The code for this project uses python 3.7+ and the following pip packages:
 
 ```bash
-python3 -m pip install --upgrade pip
+python3 -m venv ./venv
+source ./venv/bin/activate
+python3 -m pip install --upgrade pip wheel
 pip install \
   absl-py==0.12.0 \
   gin-config==0.4.0 \
@@ -38,8 +40,10 @@ pip install \
   tensorflow-probability==0.14.1 \
   tf-agents==0.11.0rc0 \
   einops==0.3.2 \
-  protobuf==3.19.1
+  protobuf==3.19.1 \
+  gym==0.21.0
 # pip install -e ~/devel/tf_agents
+pip freeze > ./requirements.freeze.txt
 ```
 
 (Optional): For Mujoco support, see [`docs/mujoco_setup.md`](docs/mujoco_setup.md).  Recommended to skip it
