@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eu
 
 ## Use "N" of the N-d environment as the arg
 

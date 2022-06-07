@@ -37,7 +37,8 @@ pip install \
   wandb==0.12.7 \
   tensorflow-probability==0.14.1 \
   tf-agents==0.11.0rc0 \
-  einops==0.3.2
+  einops==0.3.2 \
+  protobuf==3.19.1
 # pip install -e ~/devel/tf_agents
 ```
 
